@@ -10,19 +10,26 @@ import {
 } from "../components";
 
 import { localizer, getMessagesEs } from "../../helpers";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCalendarStore, useUiStore } from "../../hooks";
+import { useAuthStore } from "../../hooks/useAuthStore";
 
 export const CalendarPage = () => {
+  const { user } = useAuthStore();
   const { openDateModal } = useUiStore();
-  const { events, setActiveEvent } = useCalendarStore();
+  const { events, setActiveEvent, startLoadingEvents } = useCalendarStore();
   const [lastView, setLastView] = useState(
     localStorage.getItem("lastView") || "week"
   );
 
   const eventStyleGetter = (event, start, end, isSelected) => {
+    console.log("event", event);
+    console.log(user);
+    const isMyEvent =
+      user.uuid === event.user._id || user.uuid === event.user.uuid;
+    console.log("isMyEvent", isMyEvent);
     const style = {
-      backgroundColor: "#367CF7",
+      backgroundColor: isMyEvent ? "#367CF7" : "#465660",
       borderRadius: "0px",
       opacity: 0.8,
       color: "white",
@@ -45,6 +52,10 @@ export const CalendarPage = () => {
     localStorage.setItem("lastView", e);
     setLastView(e);
   };
+
+  useEffect(() => {
+    startLoadingEvents();
+  }, []);
 
   return (
     <div>
